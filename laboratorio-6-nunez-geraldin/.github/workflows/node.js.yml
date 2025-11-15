@@ -20,7 +20,7 @@ jobs:
         node-version: '18'
 
     - name: Install dependencies
-      working-directory: laboratorio-6-nunez-geraldin
+      working-directory: laboratorio-6-nunez-geraldin/laboratorio-6-nunez-geraldin
       run: npm install
 
     - name: Build project
