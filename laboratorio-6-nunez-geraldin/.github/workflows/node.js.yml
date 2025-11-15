@@ -1,51 +1,67 @@
-name: Node.js CI
+name: Deploy App
 
 on:
   push:
     branches: [ "main" ]
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 jobs:
-
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./laboratorio-6-nunez-geraldin
+
     steps:
       - uses: actions/checkout@v5
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22.x
-          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Build
-        run: npm run build -- --base=/${{ github.event.repository.name }}/
-
-      - name: Upload artifact for Pages
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: ./dist
+      - name: Build app
+        run: npm run build
 
   deploy-pages:
     name: Deploy to GitHub Pages
-    needs: [ build ]
+    needs: build
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
 
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Configure Pages
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: ./laboratorio-6-nunez-geraldin
+        run: npm ci
+
+      - name: Build application for GitHub Pages
+        working-directory: ./laboratorio-6-nunez-geraldin
+        run: npm run build -- --base=/${{ github.event.repository.name }}/ --mode=development
+
+      - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Deploy
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ./laboratorio-6-nunez-geraldin/dist
+
+      - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
